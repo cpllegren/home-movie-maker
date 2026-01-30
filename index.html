@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RetroClip - Video Editor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Password Gate -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="login-icon">
+        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+        <line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/>
+        <line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/>
+        <line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/>
+        <line x1="17" y1="7" x2="22" y2="7"/>
+      </svg>
+      <h1>RetroClip</h1>
+      <p>Enter password to continue</p>
+      <form id="loginForm" autocomplete="off">
+        <input type="password" id="passwordInput" class="text-input" placeholder="Password" autofocus required>
+        <button type="submit" class="btn btn-primary">Unlock</button>
+      </form>
+      <p id="loginError" class="login-error" hidden>Incorrect password.</p>
+    </div>
+  </div>
+
+  <div id="app" hidden>
+    <header>
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+          <line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/>
+          <line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/>
+          <line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/>
+          <line x1="17" y1="7" x2="22" y2="7"/>
+        </svg>
+        <h1>RetroClip</h1>
+      </div>
+      <div class="header-actions">
+        <button id="settingsBtn" class="icon-btn" title="Google API Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="preview-section">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="previewCanvas"></canvas>
+          <div class="drop-zone" id="dropZone">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+            </svg>
+            <p>Drop a video file here</p>
+            <span>or use the import options on the right</span>
+          </div>
+        </div>
+        <div class="playback-bar">
+          <button id="playBtn" class="play-btn" title="Play/Pause (Space)" disabled>
+            <svg id="playIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <svg id="pauseIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </button>
+          <span id="currentTime" class="time-display">0:00</span>
+          <div class="seek-container">
+            <input type="range" id="seekBar" class="seek-bar" min="0" max="1000" value="0" step="1" disabled>
+          </div>
+          <span id="totalTime" class="time-display">0:00</span>
+          <div class="volume-control">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <input type="range" id="volumeBar" class="volume-bar" min="0" max="100" value="100">
+          </div>
+        </div>
+      </section>
+
+      <aside class="controls-panel">
+        <div class="panel-scroll">
+          <!-- Import -->
+          <div class="control-group">
+            <h3>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Import Video
+            </h3>
+            <div class="import-buttons">
+              <button id="uploadBtn" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                Upload from Device
+              </button>
+              <button id="googleDriveBtn" class="btn btn-outline">
+                <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M7.71 3.5L1.15 15l3.43 5.98L11.14 9.5 7.71 3.5zm1.14 0l6.86 12H22.86l-3.43-6L12.57 3.5H8.85zm7.28 12.5H2.57L6 22h13.72l3.43-6H16.13z"/></svg>
+                Google Drive
+              </button>
+              <button id="googlePhotosBtn" class="btn btn-outline">
+                <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                Google Photos
+              </button>
+            </div>
+            <input type="file" id="fileInput" accept="video/*" hidden>
+          </div>
+
+          <!-- Title -->
+          <div class="control-group" id="titleGroup">
+            <h3>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+              Title
+            </h3>
+            <input type="text" id="titleInput" class="text-input" placeholder="Enter a title..." maxlength="100">
+            <div class="slider-row">
+              <label>Size</label>
+              <input type="range" id="titleSize" min="12" max="150" value="48" class="slider">
+              <span id="titleSizeVal" class="slider-val">48px</span>
+            </div>
+            <div class="slider-row">
+              <label>Color</label>
+              <input type="color" id="titleColor" value="#ffffff" class="color-input">
+            </div>
+            <div class="checkbox-row">
+              <label><input type="checkbox" id="titleBg" checked> Background</label>
+            </div>
+          </div>
+
+          <!-- Timestamp -->
+          <div class="control-group" id="timestampGroup">
+            <h3>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Date &amp; Timestamp
+            </h3>
+            <input type="datetime-local" id="timestampInput" class="text-input">
+            <div class="slider-row">
+              <label>Size</label>
+              <input type="range" id="timestampSize" min="10" max="100" value="28" class="slider">
+              <span id="timestampSizeVal" class="slider-val">28px</span>
+            </div>
+            <div class="slider-row">
+              <label>Color</label>
+              <input type="color" id="timestampColor" value="#ffaa00" class="color-input">
+            </div>
+            <select id="timestampFormat" class="select-input">
+              <option value="us">MM/DD/YYYY HH:MM AM/PM</option>
+              <option value="eu">DD.MM.YYYY HH:MM</option>
+              <option value="iso">YYYY-MM-DD HH:MM:SS</option>
+              <option value="date-only">Date Only</option>
+              <option value="time-only">Time Only</option>
+            </select>
+            <div class="checkbox-row">
+              <label><input type="checkbox" id="timestampBg" checked> Background</label>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="control-group">
+            <h3>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              Filter
+            </h3>
+            <div class="filter-grid">
+              <button class="filter-btn active" data-filter="none">
+                <span class="filter-preview fp-none"></span>None
+              </button>
+              <button class="filter-btn" data-filter="vhs">
+                <span class="filter-preview fp-vhs"></span>VHS
+              </button>
+              <button class="filter-btn" data-filter="super8">
+                <span class="filter-preview fp-super8"></span>Super 8
+              </button>
+              <button class="filter-btn" data-filter="camcorder">
+                <span class="filter-preview fp-camcorder"></span>Camcorder
+              </button>
+              <button class="filter-btn" data-filter="8mm">
+                <span class="filter-preview fp-8mm"></span>8mm Film
+              </button>
+              <button class="filter-btn" data-filter="16mm">
+                <span class="filter-preview fp-16mm"></span>16mm Film
+              </button>
+            </div>
+            <div id="filterIntensity" class="slider-row" style="display:none">
+              <label>Intensity</label>
+              <input type="range" id="intensitySlider" min="20" max="100" value="75" class="slider">
+              <span id="intensityVal" class="slider-val">75%</span>
+            </div>
+          </div>
+
+          <!-- Text Positioning -->
+          <div class="control-group">
+            <h3>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+              Text Position
+            </h3>
+            <p class="hint">Drag text directly on the preview to reposition, or use controls below.</p>
+            <div class="position-section">
+              <span class="pos-label">Title Position</span>
+              <div class="position-presets" id="titlePositionPresets">
+                <button data-pos="top-left" title="Top Left">&#x2196;</button>
+                <button data-pos="top-center" title="Top Center">&#x2191;</button>
+                <button data-pos="top-right" title="Top Right">&#x2197;</button>
+                <button data-pos="center" title="Center">&#x2022;</button>
+                <button data-pos="bottom-left" title="Bottom Left">&#x2199;</button>
+                <button data-pos="bottom-center" title="Bottom Center" class="active">&#x2193;</button>
+                <button data-pos="bottom-right" title="Bottom Right">&#x2198;</button>
+              </div>
+            </div>
+            <div class="position-section">
+              <span class="pos-label">Timestamp Position</span>
+              <div class="position-presets" id="timestampPositionPresets">
+                <button data-pos="top-left" title="Top Left">&#x2196;</button>
+                <button data-pos="top-center" title="Top Center">&#x2191;</button>
+                <button data-pos="top-right" title="Top Right">&#x2197;</button>
+                <button data-pos="center" title="Center">&#x2022;</button>
+                <button data-pos="bottom-left" title="Bottom Left">&#x2199;</button>
+                <button data-pos="bottom-center" title="Bottom Center">&#x2193;</button>
+                <button data-pos="bottom-right" title="Bottom Right" class="active">&#x2198;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Export -->
+          <div class="control-group export-group">
+            <h3>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export
+            </h3>
+            <button id="exportBtn" class="btn btn-export" disabled>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export as MP4
+            </button>
+            <div class="export-info" id="exportInfo" hidden>
+              <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+              </div>
+              <span id="progressText" class="progress-text">Preparing...</span>
+              <button id="cancelExport" class="btn btn-sm">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Google API Settings</h2>
+        <button id="closeSettings" class="icon-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-info">To import videos from Google Drive or Google Photos, you need to configure Google Cloud API credentials.</p>
+        <ol class="setup-steps">
+          <li>Go to <a href="https://console.cloud.google.com" target="_blank" rel="noopener">Google Cloud Console</a></li>
+          <li>Create a project and enable the <strong>Google Drive API</strong> and <strong>Google Picker API</strong></li>
+          <li>Create an <strong>API Key</strong> (restrict to Picker API)</li>
+          <li>Create an <strong>OAuth 2.0 Client ID</strong> (Web application type)</li>
+          <li>Add your domain to Authorized JavaScript Origins</li>
+        </ol>
+        <div class="form-field">
+          <label for="googleApiKey">API Key</label>
+          <input type="text" id="googleApiKey" class="text-input" placeholder="AIza...">
+        </div>
+        <div class="form-field">
+          <label for="googleClientId">OAuth Client ID</label>
+          <input type="text" id="googleClientId" class="text-input" placeholder="xxxx.apps.googleusercontent.com">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="saveSettings" class="btn btn-primary">Save</button>
+        <button id="cancelSettings" class="btn btn-outline">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div id="notification" class="notification" hidden></div>
+
+  <!-- Hidden video source -->
+  <video id="sourceVideo" crossorigin="anonymous" playsinline style="display:none"></video>
+
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+  <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/util.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
